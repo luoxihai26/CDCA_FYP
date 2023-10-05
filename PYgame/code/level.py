@@ -7,9 +7,7 @@ from support import *
 from random import choice
 from weapon import Weapon
 from ui import UI
-
-sourceFileDir = os.path.abspath("C:/IVELWL/CDCA_FYP/PYgame")
-
+from enemy import Enemy
 
 class Level:
 	def __init__(self):
@@ -32,13 +30,14 @@ class Level:
 
 	def create_map(self):
 		layouts = {
-			'boundary': import_csv_layout(sourceFileDir + "/map/map_FloorBlocks.csv"),
-			'grass': import_csv_layout(sourceFileDir + "/map/map_Grass.csv"),
-			'object': import_csv_layout(sourceFileDir +"/map/map_Objects.csv"),
+			"boundary": import_csv_layout(sourceFileDir + "/map/map_FloorBlocks.csv"),
+			"grass": import_csv_layout(sourceFileDir + "/map/map_Grass.csv"),
+			"object": import_csv_layout(sourceFileDir +"/map/map_Objects.csv"),
+			"entities": import_csv_layout(sourceFileDir + "/map/map_Entities.csv")
 		}
 		graphics = {
-			'grass': import_folder(sourceFileDir +"/graphics/Grass"),
-			'objects': import_folder(sourceFileDir +"/graphics/objects")
+			"grass": import_folder(sourceFileDir +"/graphics/Grass"),
+			"objects": import_folder(sourceFileDir +"/graphics/objects")
 		}
 
 		for style,layout in layouts.items():
@@ -47,20 +46,34 @@ class Level:
 					if col != '-1':
 						x = col_index * TILESIZE
 						y = row_index * TILESIZE
-						if style == 'boundary':
+						if style == "boundary":
 							Tile((x,y),[self.obstacle_sprites],'invisible')
-						if style == 'grass':
-							random_grass_image = choice(graphics['grass'])
+						if style == "grass":
+							random_grass_image = choice(graphics["grass"])
 							Tile((x,y),[self.visible_sprites,self.obstacle_sprites],'grass',random_grass_image)
 
-						if style == 'object':
-							surf = graphics['objects'][int(col)]
+						if style == "object":
+							surf = graphics["objects"][int(col)]
 							Tile((x,y),[self.visible_sprites,self.obstacle_sprites],'object',surf)
 
-		self.player = Player((2000,1430),[self.visible_sprites],self.obstacle_sprites,self.create_attack,self.destroy_attack)
+						if style == "entities":
+							if col == '394':
+								self.player = Player((x,y),
+											[self.visible_sprites],
+											self.obstacle_sprites,
+											self.create_attack,
+           									self.destroy_attack,
+											self.create_magic)
+							else:
+								Enemy("squid",(x,y),[self.visible_sprites])
 	
 	def create_attack(self):
 		self.current_attack = Weapon(self.player,[self.visible_sprites])
+  
+	def create_magic(self,style,strength,cost):
+		print(style)
+		print(strength)
+		print(cost)
 
 	def destroy_attack(self):
 		if self.current_attack:
