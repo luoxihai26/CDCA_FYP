@@ -1,6 +1,5 @@
-import pygame, os
-
-sourceFileDir = "C:/IVELWL/CDCA_FYP/PYgame"
+import pygame
+from settings import sourceFileDir
 
 class Weapon(pygame.sprite.Sprite):
 	def __init__(self,player,groups):
@@ -8,7 +7,7 @@ class Weapon(pygame.sprite.Sprite):
 		direction = player.status.split('_')[0]
 
 		# graphic
-		full_path = os.path.join(sourceFileDir, f"graphics/weapons/{player.weapon}/{direction}.png")
+		full_path = sourceFileDir + f'/graphics/weapons/{player.weapon}/{direction}.png'
 		self.image = pygame.image.load(full_path).convert_alpha()
 		
 		# placement
