@@ -1,12 +1,17 @@
-import pygame 
+import pygame, boto3
 from settings import *
 from support import import_folder
 from entity import Entity
 
+s3 = boto3.client('s3')
+bucket_name = 'my-fyp-bucket220322510'
+file_key = 'test/player.png'
+
 class Player(Entity):
 	def __init__(self,pos,groups,obstacle_sprites,create_attack,destroy_attack,create_magic):
 		super().__init__(groups)
-		self.image = pygame.image.load(sourceFileDir + '/graphics/test/player.png').convert_alpha()
+		#self.image = pygame.image.load(sourceFileDir + '/graphics/test/player.png').convert_alpha()
+		self.image = pygame.image.load('player.png').convert_alpha()
 		self.rect = self.image.get_rect(topleft = pos)
 		self.hitbox = self.rect.inflate(0,-26)
 
