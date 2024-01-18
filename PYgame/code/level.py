@@ -67,9 +67,13 @@ class Level:
 								'grass',
 								random_grass_image)
 
+						save_point_image = sourceFileDir + '/graphics/objects/99.jpg'
 						if style == 'object':
-							surf = graphics['objects'][int(col)]
-							Tile((x,y),[self.visible_sprites,self.obstacle_sprites],'object',surf)
+							if col == 'savepoint':
+								surf = save_point_image
+							else:
+								surf = graphics['objects'][int(col)]
+								Tile((x,y),[self.visible_sprites,self.obstacle_sprites],'object',surf)
 
 						if style == 'entities':
 							if col == '394':

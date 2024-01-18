@@ -1,4 +1,4 @@
-import os
+import os, pygame
 
 sourceFileDir = os.path.abspath("C:/IVELWL/CDCA_FYP/PYgame")
 

@@ -1,17 +1,25 @@
-import pygame, boto3
+import pygame, boto3, json
 from settings import *
 from support import import_folder
 from entity import Entity
 
-s3 = boto3.client('s3')
-bucket_name = 'my-fyp-bucket220322510'
-file_key = 'test/player.png'
+import boto3
+
+# Specify the bucket name, file key, and destination folder
+# bucket_name = 'my-fyp-bucket220322510'
+# file_key = 'test/player.png'
+# destination_folder = sourceFileDir
+
+# # Initialize the AWS S3 client
+# s3 = boto3.client('s3')
+
+# # Download the file from S3
+# s3.download_file(bucket_name, file_key, destination_folder + '/graphics/test/player.png')
 
 class Player(Entity):
 	def __init__(self,pos,groups,obstacle_sprites,create_attack,destroy_attack,create_magic):
 		super().__init__(groups)
-		#self.image = pygame.image.load(sourceFileDir + '/graphics/test/player.png').convert_alpha()
-		self.image = pygame.image.load('player.png').convert_alpha()
+		self.image = pygame.image.load(sourceFileDir + '/graphics/test/player.png').convert_alpha()
 		self.rect = self.image.get_rect(topleft = pos)
 		self.hitbox = self.rect.inflate(0,-26)
 
@@ -50,11 +58,15 @@ class Player(Entity):
 		self.exp = 5000
 		self.speed = self.stats['speed']
   
+		data = json.dumps(self.stats, indent=4)
+		print(data)
+  
 		# damage timer
 		self.vulnerable = True
 		self.hurt_time = None
 		self.invulnerability_duration = 500
-
+	
+  
 	def import_player_assets(self):
 		character_path = sourceFileDir + '/graphics/player/'
 		self.animations = {'up': [],'down': [],'left': [],'right': [],
@@ -204,7 +216,7 @@ class Player(Entity):
 			self.energy += 0.01 * self.stats['magic']
 		else:
 			self.energy = self.stats['energy']
-
+   
 	def update(self):
 		self.input()
 		self.cooldowns()

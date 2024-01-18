@@ -1,7 +1,9 @@
-import pygame
+import pygame, random, time
 from settings import *
 from entity import Entity
 from support import *
+from tkinter import simpledialog
+from tkinter.messagebox import askquestion
 
 class Enemy(Entity):
     def __init__(self,monster_name,pos,groups,obstacle_sprites,damage_player,trigger_death_particles,add_exp):
@@ -35,7 +37,7 @@ class Enemy(Entity):
         # player interaction
         self.can_attack = True
         self.attack_time = None
-        self.attack_cooldown = 400
+        self.attack_cooldown = 40000000000000
         self.damage_player = damage_player
         self.trigger_death_particles = trigger_death_particles
         self.add_exp = add_exp
@@ -75,15 +77,38 @@ class Enemy(Entity):
         else:
             self.status = 'idle'
             
-    def actions(self,player):
+    def actions(self, player):
         if self.status == 'attack':
-            self.attack_time = pygame.time.get_ticks()
-            self.damage_player(self.attack_damage,self.attack_type)
-        elif self.status == 'move':
-            self.direction = self.get_player_distance_direction(player)[1]
-        else:
-            self.direction = pygame.math.Vector2()
-
+            current_time = pygame.time.get_ticks()
+            if self.attack_time is None or current_time - self.attack_time >= self.attack_cooldown:  # Delay of 5 seconds
+                
+                num1 = random.randint(1, 10)
+                num2 = random.randint(1, 10)
+                answer = num1 + num2  # Customize the math operation as desired
+                
+                question = f"What is {num1} + {num2}?"
+                response = askquestion("Math Question", question)
+                
+                if response == 'yes':
+                    user_answer = simpledialog.askinteger("Math Question", question)
+                    if user_answer == answer:
+                        self.attack_time = pygame.time.get_ticks()
+                        self.damage_player(self.attack_damage, self.attack_type)
+                    elif self.status == 'move':
+                        self.direction = self.get_player_distance_direction(player)[1]
+                    else:
+                        self.direction = pygame.math.Vector2()      
+        # def actions(self, player):
+        # if self.status == 'attack':
+        #     response = askquestion("Confirmation", "Do you want to attack?")
+        #     if response == 'yes':
+        #         self.attack_time = pygame.time.get_ticks()
+        #         self.damage_player(self.attack_damage, self.attack_type)
+        # elif self.status == 'move':
+        #     self.direction = self.get_player_distance_direction(player)[1]
+        # else:
+        #     self.direction = pygame.math.Vector2()
+            
     def animate(self):
         animation = self.animations[self.status]
         
