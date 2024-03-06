@@ -1,4 +1,4 @@
-import pygame, boto3, json
+import pygame, boto3, botocore.exceptions
 from settings import *
 from support import import_folder
 from entity import Entity
@@ -6,15 +6,27 @@ from entity import Entity
 import boto3
 
 # Specify the bucket name, file key, and destination folder
-# bucket_name = 'my-fyp-bucket220322510'
-# file_key = 'test/player.png'
-# destination_folder = sourceFileDir
+bucket_name = 'my-fyp-bucket220322510'
+file_key = 'test/player.png'
+destination_folder = sourceFileDir
 
-# # Initialize the AWS S3 client
-# s3 = boto3.client('s3')
+# Initialize the AWS S3 client
+s3 = boto3.client('s3')
 
-# # Download the file from S3
-# s3.download_file(bucket_name, file_key, destination_folder + '/graphics/test/player.png')
+# Download the file from S3
+s3.download_file(bucket_name, file_key, destination_folder + '/graphics/test/player.png')
+
+# Initialize the AWS dynamoDB
+dynamodb = boto3.resource('dynamodb')
+table = dynamodb.Table('PYgameTesting')
+
+def upload_data(data):
+    table = dynamodb.Table('PYgameTesting')
+    response = table.put_item(
+		Item=data
+	)
+    return response
+
 
 class Player(Entity):
 	def __init__(self,pos,groups,obstacle_sprites,create_attack,destroy_attack,create_magic):
@@ -55,18 +67,17 @@ class Player(Entity):
 		self.upgrade_cost = {'health': 100,'energy': 100,'attack': 100,'magic': 100,'speed': 100}
 		self.health = self.stats['health'] * 0.5
 		self.energy = self.stats['energy'] * 0.8
-		self.exp = 5000
+		self.exp = 0
 		self.speed = self.stats['speed']
   
-		data = json.dumps(self.stats, indent=4)
-		print(data)
-  
+		# data = json.dumps(self.stats, indent=4)
+		# print(data)
+
 		# damage timer
 		self.vulnerable = True
 		self.hurt_time = None
 		self.invulnerability_duration = 500
 	
-  
 	def import_player_assets(self):
 		character_path = sourceFileDir + '/graphics/player/'
 		self.animations = {'up': [],'down': [],'left': [],'right': [],
@@ -136,6 +147,7 @@ class Player(Entity):
 					self.magic_index = 0
 
 				self.magic = list(magic_data.keys())[self.magic_index]
+    
 
 	def get_status(self):
 
@@ -216,7 +228,19 @@ class Player(Entity):
 			self.energy += 0.01 * self.stats['magic']
 		else:
 			self.energy = self.stats['energy']
-   
+
+	def handle_input(self):
+		keys = pygame.key.get_pressed()
+		if keys[pygame.K_u]:
+				data = {
+					'Class': '1C',
+					'StudentID': '122',
+     				'Score': self.exp
+				}
+				response = upload_data(data)
+				print("Score uploaded", response)
+ 
+ 
 	def update(self):
 		self.input()
 		self.cooldowns()
@@ -224,3 +248,4 @@ class Player(Entity):
 		self.animate()
 		self.move(self.stats['speed'])
 		self.energy_recovery()
+		self.handle_input()

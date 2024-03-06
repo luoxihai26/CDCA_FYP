@@ -12,6 +12,14 @@ class Game:
 		pygame.display.set_caption('Zelda')
 		self.clock = pygame.time.Clock()
 		self.level = Level()
+		self.email_rect = pygame.Rect(300, 200, 200,30)
+		self.password_rect=pygame.Rect(300, 250, 200, 30)
+		self.email = ""
+		self.password = ""
+	
+	def draw(self, screen):
+		pygame.draw.rect(screen, (200,200,200), self.email_rect)
+		pygame.draw.rect(screen, (200,200,200), self.password_rect)
 	
 	def run(self):
 

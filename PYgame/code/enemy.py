@@ -1,8 +1,9 @@
-import pygame, random, time
+import pygame, random, time, threading
+import tkinter as tk
 from settings import *
 from entity import Entity
 from support import *
-from tkinter import simpledialog
+from tkinter import simpledialog, messagebox
 from tkinter.messagebox import askquestion
 
 class Enemy(Entity):
@@ -37,7 +38,7 @@ class Enemy(Entity):
         # player interaction
         self.can_attack = True
         self.attack_time = None
-        self.attack_cooldown = 40000000000000
+        self.attack_cooldown = 400000
         self.damage_player = damage_player
         self.trigger_death_particles = trigger_death_particles
         self.add_exp = add_exp
@@ -46,6 +47,7 @@ class Enemy(Entity):
         self.vulnerable = True
         self.hit_time = None
         self.invincibility_duration = 300
+        
         
     def import_graphics(self,name):
         self.animations = {'idle':[],'move':[],'attack':[]}
@@ -77,38 +79,48 @@ class Enemy(Entity):
         else:
             self.status = 'idle'
             
+    def delay_character_movement():
+        time.sleep(5)
+        self.direction = pygame.math.Vector2()
+        
+               
     def actions(self, player):
         if self.status == 'attack':
-            current_time = pygame.time.get_ticks()
-            if self.attack_time is None or current_time - self.attack_time >= self.attack_cooldown:  # Delay of 5 seconds
-                
+            question_type = random.choice(['math', 'english']) # randomly choose the question type
+            if question_type == 'math': # the structure of Math question
                 num1 = random.randint(1, 10)
                 num2 = random.randint(1, 10)
-                answer = num1 + num2  # Customize the math operation as desired
-                
+                answer = num1 + num2  
                 question = f"What is {num1} + {num2}?"
                 response = askquestion("Math Question", question)
-                
-                if response == 'yes':
+            
+                if response == 'yes': # user must click "YES" to get the question
                     user_answer = simpledialog.askinteger("Math Question", question)
                     if user_answer == answer:
-                        self.attack_time = pygame.time.get_ticks()
-                        self.damage_player(self.attack_damage, self.attack_type)
-                    elif self.status == 'move':
-                        self.direction = self.get_player_distance_direction(player)[1]
+                        messagebox.showinfo("Correct", "You are correct!") # The action performed when user's answer is correct
+                        self.health = 0
+                        self.kill()
                     else:
-                        self.direction = pygame.math.Vector2()      
-        # def actions(self, player):
-        # if self.status == 'attack':
-        #     response = askquestion("Confirmation", "Do you want to attack?")
-        #     if response == 'yes':
-        #         self.attack_time = pygame.time.get_ticks()
-        #         self.damage_player(self.attack_damage, self.attack_type)
-        # elif self.status == 'move':
-        #     self.direction = self.get_player_distance_direction(player)[1]
-        # else:
-        #     self.direction = pygame.math.Vector2()
-            
+                        messagebox.showinfo("Incorrect", "You are incorrect!") # The action performed when user's answer is incorrect
+                        self.damage_player(self.attack_damage, self.attack_type)
+                        threading.Thread(target=self.delay_character_movement).start()   
+                        self.direction = pygame.math.Vector2()
+                        
+            elif question_type == 'english': # the structure of English question
+                question = "Which of the following is an animal? Pen, Apple, Lion"
+                answer = "Lion"
+                answer_box = simpledialog.askstring("Eng Question", prompt=question)
+                if answer_box == answer:
+                    messagebox.showinfo("Correct", "You are correct!") # The action performed when user's answer is correct
+                    self.health = 0
+                    self.kill()
+                else:
+                    messagebox.showinfo("Incorrect", "You are incorrect!") # The action performed when user's answer is incorrect
+                    self.damage_player(self.attack_damage, self.attack_type)
+                    time.sleep(5)
+                    self.direction = pygame.math.Vector2()
+                
+
     def animate(self):
         animation = self.animations[self.status]
         
@@ -162,8 +174,10 @@ class Enemy(Entity):
         self.move(self.speed)
         self.animate()
         self.cooldowns()
-        self.check_death()
+        #self.check_death()
         
     def enemy_update(self,player):
         self.get_status(player)
         self.actions(player)
+        self.check_death()
+        
